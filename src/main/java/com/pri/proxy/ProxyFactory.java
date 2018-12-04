@@ -14,8 +14,8 @@ public class ProxyFactory implements MethodInterceptor {
         Object object = null;
         Annotation[] annotations = method.getAnnotations();
         for (Annotation annotation : annotations) {
-            String annotationName = annotation.toString();
-            annotationName = annotationName.replace("@","").replace("()","");
+            System.out.println(">>>>>>>>>>>>>>"+annotation.annotationType().getName());
+            String annotationName = annotation.annotationType().getName();
             Object aopInstance = AopFactory.get(annotationName);
             if(null != aopInstance){
                 Aspect aspect = (Aspect) aopInstance;

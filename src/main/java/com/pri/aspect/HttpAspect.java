@@ -5,6 +5,7 @@ import com.pri.annotation.Aop;
 @Aop
 public class HttpAspect implements Aspect{
 
+//    拦截注解了HttpLog的方法
     @Aop("com.pri.annotation.HttpLog")
     public String annotationDefine;
 

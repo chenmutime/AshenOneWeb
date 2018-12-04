@@ -13,7 +13,6 @@ public class IndexController {
     @HttpLog
     @WebUrl("/user")
     public String currentUser() {
-        int i = 1/0;
         return "success:" + indexService.get();
     }
 

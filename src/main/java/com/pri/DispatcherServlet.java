@@ -3,6 +3,7 @@ package com.pri;
 import com.alibaba.fastjson.JSONObject;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MethodFactory;
+import com.pri.loader.AopLoader;
 import com.pri.loader.BeansLoader;
 import com.pri.wrapper.ResponseWrapper;
 
@@ -21,6 +22,7 @@ public class DispatcherServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         System.out.println("项目启动");
         String scanPackagePath = config.getServletContext().getInitParameter("scanPackage");
+        AopLoader.load(scanPackagePath);
         BeansLoader.load(scanPackagePath);
 
     }

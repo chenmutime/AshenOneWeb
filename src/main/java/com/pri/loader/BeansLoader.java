@@ -1,15 +1,16 @@
 package com.pri.loader;
 
-import com.pri.annotation.Controller;
-import com.pri.annotation.Inject;
-import com.pri.annotation.Service;
-import com.pri.annotation.WebUrl;
+import com.pri.annotation.*;
 import com.pri.exception.NoInjectException;
+import com.pri.factories.AopFactory;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MethodFactory;
+import com.pri.proxy.ProxyFactory;
+import net.sf.cglib.proxy.Enhancer;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -43,8 +44,7 @@ public class BeansLoader {
         while (iterator.hasNext()) {
             Map.Entry<String, Object> map = iterator.next();
             Object instance = map.getValue();
-//          执行依赖注入
-            Field[] fields = instance.getClass().getDeclaredFields();
+            Field[] fields = instance.getClass().getSuperclass().getDeclaredFields();
             try {
                 for (Field field : fields) {
                     field.setAccessible(true);
@@ -81,7 +81,9 @@ public class BeansLoader {
                     Class clz = Class.forName(packageName + "." + fileName.replace(".class", ""));
                     if (isService(clz) || isController(clz)) {
                         System.out.println(packageName + "." + fileName.replace(".class", ""));
-                        BeanFactory.put(fileName.replace(".class", ""), clz.newInstance());
+                        Object instance = Enhancer.create(clz, new ProxyFactory());
+                        BeanFactory.put(fileName.replace(".class", ""), instance);
+
                         String path = "";
                         if (clz.isAnnotationPresent(WebUrl.class)) {
                             WebUrl webUrl = (WebUrl) clz.getAnnotation(WebUrl.class);
@@ -100,7 +102,7 @@ public class BeansLoader {
 
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

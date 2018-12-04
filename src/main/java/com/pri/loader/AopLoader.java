@@ -41,7 +41,7 @@ public class AopLoader {
                         for (Field field : fields) {
                             field.setAccessible(true);
                             Aop aop = field.getAnnotation(Aop.class);
-                            if (null != aop) {  
+                            if (null != aop) {
                                 AopFactory.put(aop.value(), instance);
                             }
                         }

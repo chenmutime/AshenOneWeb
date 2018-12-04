@@ -1,9 +1,6 @@
 package com.pri.controller;
 
-import com.pri.annotation.Controller;
-import com.pri.annotation.HttpLog;
-import com.pri.annotation.Inject;
-import com.pri.annotation.WebUrl;
+import com.pri.annotation.*;
 import com.pri.service.IndexService;
 
 @Controller
@@ -15,8 +12,8 @@ public class IndexController {
 
     @HttpLog
     @WebUrl("/user")
-    public String currentUser(){
-        return "success:"+indexService.get();
+    public String currentUser() {
+        return "success:" + indexService.get();
     }
 
 }

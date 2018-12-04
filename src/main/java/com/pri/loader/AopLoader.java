@@ -40,11 +40,10 @@ public class AopLoader {
                         Object instance = clz.newInstance();
                         for (Field field : fields) {
                             field.setAccessible(true);
-                            if(field.getAnnotations().length > 0){
-                                Aop aop = field.getAnnotation(Aop.class);
+                            Aop aop = field.getAnnotation(Aop.class);
+                            if (null != aop) {  
                                 AopFactory.put(aop.value(), instance);
                             }
-
                         }
                     }
                 }

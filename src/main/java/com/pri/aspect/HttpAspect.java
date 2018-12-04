@@ -18,4 +18,9 @@ public class HttpAspect implements Aspect{
     public void doAfter() {
         System.out.println("执行代码完成");
     }
+
+    @Override
+    public void doException(Exception e) {
+        System.out.println("执行代码出现异常:"+e.getMessage());
+    }
 }

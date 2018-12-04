@@ -19,7 +19,12 @@ public class ProxyFactory implements MethodInterceptor {
             if(null != aopInstance){
                 Aspect aspect = (Aspect) aopInstance;
                 aspect.doBefore();
-                object = methodProxy.invokeSuper(o, args);
+                try {
+                    object = methodProxy.invokeSuper(o, args);
+                }catch (Exception e){
+                    aspect.doException(e);
+                    break;
+                }
                 aspect.doAfter();
             }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MethodFactory;
 import com.pri.loader.BeansLoader;
+import com.pri.wrapper.ResponseWrapper;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -37,9 +38,7 @@ public class DispatcherServlet extends HttpServlet {
         try {
             Object result = method.invoke(clz);
             String jsonRsult = JSONObject.toJSONString(result);
-            resp.setStatus(200);
-            resp.setHeader("Content-Length",""+jsonRsult.getBytes().length);
-            resp.setHeader("Content-Type","application/json");
+            ResponseWrapper.defaultResponse(resp, jsonRsult);
             resp.getWriter().print(jsonRsult);
         } catch (IllegalAccessException e) {
             e.printStackTrace();

@@ -30,7 +30,7 @@ public class BeansLoader {
             URL uri = urlEnumeration.nextElement();
             String fileUrl = uri.getFile();
             File directory = new File(fileUrl);
-            addClassess(directory, scanPackage);
+            addInstances(directory, scanPackage);
             depencyInject();
         }
     }
@@ -70,12 +70,12 @@ public class BeansLoader {
      * @param directory
      * @param packageName
      */
-    private static void addClassess(File directory, String packageName) {
+    private static void addInstances(File directory, String packageName) {
         File[] files = directory.listFiles();
         try {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    addClassess(file, packageName + "." + file.getName());
+                    addInstances(file, packageName + "." + file.getName());
                 } else {
                     String fileName = file.getName();
                     Class clz = Class.forName(packageName + "." + fileName.replace(".class", ""));
@@ -92,6 +92,7 @@ public class BeansLoader {
                             if (method.isAnnotationPresent(WebUrl.class)) {
                                 WebUrl webUrl = method.getAnnotation(WebUrl.class);
                                 path += webUrl.value();
+                                System.out.println(path);
                                 MethodFactory.put(path, method);
                             }
                         }

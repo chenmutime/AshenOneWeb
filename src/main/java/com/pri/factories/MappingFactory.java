@@ -15,10 +15,8 @@ public class MappingFactory {
     }
 
     public static MappingEntity get(String uri) {
+
         return mappingMap.get(uri);
     }
 
-    public static Set<String> getAllPath(){
-        return mappingMap.keySet();
-    }
 }

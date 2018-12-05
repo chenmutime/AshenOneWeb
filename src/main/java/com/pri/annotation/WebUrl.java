@@ -1,5 +1,7 @@
 package com.pri.annotation;
 
+import com.pri.constant.HttpMethod;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,5 +13,5 @@ public @interface WebUrl {
 
     String value() default "";
 
-    String method() default "GET";
+    HttpMethod method() default HttpMethod.GET;
 }

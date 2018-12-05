@@ -125,25 +125,20 @@ public class ApplicationLoader {
         for (Method method : methods) {
             if (method.isAnnotationPresent(WebUrl.class)) {
                 WebUrl methodWebUrl = method.getAnnotation(WebUrl.class);
-                String methodPath = classPath + methodWebUrl.value();
-                String urlPath = "";
-                String[] paths = methodPath.split("/");
-                for (int i = 0, j = paths.length; i < j; i++) {
-                    if (paths[i].startsWith("{") && paths[i].endsWith("}")) {
-                        paths[i] = "{#}";
-                    }
-                    if (StringUtils.isNotBlank(paths[i])) {
-                        urlPath += "/" + paths[i];
-                    }
+                String webPath =  methodWebUrl.value();
+                if (!webPath.startsWith("/")) {
+                    webPath = "/" + webPath;
                 }
-                if (null != MappingFactory.get(urlPath)) {
+                String methodPath = classPath + webPath;
+                if (null != MappingFactory.get(methodPath)) {
                     throw new MappingExitsException();
                 }
                 System.out.println(methodPath);
                 MappingEntity entity = new MappingEntity();
                 entity.setClassPath(classPath);
                 entity.setMethod(method);
-                MappingFactory.put(urlPath, entity);
+                entity.setHttpMethod(methodWebUrl.method().name());
+                MappingFactory.put(methodPath, entity);
             }
         }
     }

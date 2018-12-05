@@ -5,6 +5,7 @@ import com.pri.entities.MappingEntity;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MappingFactory;
 import com.pri.loader.ApplicationLoader;
+import com.pri.util.ParameterUtil;
 import com.pri.wrapper.RequestWrapper;
 import com.pri.wrapper.ResponseWrapper;
 
@@ -31,34 +32,38 @@ public class DispatcherServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         String mappingUri = req.getServletPath();
+        MappingEntity mappingEntity = MappingFactory.get(mappingUri);
 
-        MappingEntity mappingEntity = RequestWrapper.getMethod(mappingUri);
+        requestFilter(req, resp, mappingEntity);
+
+        Method method = mappingEntity.getMethod();
+        Object[] param = ParameterUtil.getParameter(req, method);
+        String className = method.getDeclaringClass().getSimpleName();
+        Object clz = BeanFactory.get(className);
+        try {
+            Object result;
+            if (method.getParameterCount() > 0) {
+                result = method.invoke(clz, param);
+            } else {
+                result = method.invoke(clz);
+            }
+            String jsonRsult = JSONObject.toJSONString(result);
+            ResponseWrapper.defaultResponse(resp, jsonRsult);
+            resp.getWriter().print(jsonRsult);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void requestFilter(HttpServletRequest req, HttpServletResponse resp, MappingEntity mappingEntity) throws IOException {
         if (null == mappingEntity) {
             resp.setStatus(404);
-            resp.getWriter();
-        } else {
-            Method method = mappingEntity.getMethod();
-            String className = method.getDeclaringClass().getSimpleName();
-            Object clz = BeanFactory.get(className);
-            try {
-                Object result;
-                if (method.getParameterCount() > 1) {
-                    result = method.invoke(clz);
-                } else if (method.getParameterCount() == 1) {
-                    result = method.invoke(clz, "");
-                } else {
-                    result = method.invoke(clz);
-                }
-                String jsonRsult = JSONObject.toJSONString(result);
-                ResponseWrapper.defaultResponse(resp, jsonRsult);
-                resp.getWriter().print(jsonRsult);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
+            resp.getWriter().print("page not found");
+        } else if (!req.getMethod().toUpperCase().equals(mappingEntity.getHttpMethod())) {
+            resp.setStatus(400);
+            resp.getWriter().print("method not found");
         }
-
-
     }
 }

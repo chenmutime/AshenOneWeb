@@ -4,19 +4,20 @@ import java.lang.reflect.Method;
 
 public class MappingEntity {
 
-    private String methodName;
-
-    private String uriName;
-
-    private String uriFullName;
-
-    private Integer uriLength;
-
-    private Integer uriFullLength;
 
     private String classPath;
 
     private Method method;
+
+    private String httpMethod;
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
+    }
 
     public String getClassPath() {
         return classPath;
@@ -34,43 +35,4 @@ public class MappingEntity {
         this.method = method;
     }
 
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public String getUriName() {
-        return uriName;
-    }
-
-    public void setUriName(String uriName) {
-        this.uriName = uriName;
-    }
-
-    public String getUriFullName() {
-        return uriFullName;
-    }
-
-    public void setUriFullName(String uriFullName) {
-        this.uriFullName = uriFullName;
-    }
-
-    public Integer getUriLength() {
-        return uriLength;
-    }
-
-    public void setUriLength(Integer uriLength) {
-        this.uriLength = uriLength;
-    }
-
-    public Integer getUriFullLength() {
-        return uriFullLength;
-    }
-
-    public void setUriFullLength(Integer uriFullLength) {
-        this.uriFullLength = uriFullLength;
-    }
 }

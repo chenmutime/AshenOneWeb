@@ -1,6 +1,7 @@
 package com.pri.controller;
 
 import com.pri.annotation.*;
+import com.pri.constant.HttpMethod;
 import com.pri.service.IndexService;
 
 @Controller
@@ -16,22 +17,9 @@ public class IndexController {
         return "success:" + indexService.get();
     }
 
-    @WebUrl("/get/{userId}")
-    public String getUser(@RequestParam String userId){
-
-        return "userid";
-    }
-
-    @WebUrl("/get/{userId}/www")
-    public String getUsers(@RequestParam String userId){
-
-        return "www";
-    }
-
-    @WebUrl("/{userId}")
-    public String getUsersq(@RequestParam String userId){
-
-        return "xxsas";
+    @WebUrl(value = "/post",method = HttpMethod.POST)
+    public String post(@RequestBody String body){
+        return "sucess";
     }
 
 }

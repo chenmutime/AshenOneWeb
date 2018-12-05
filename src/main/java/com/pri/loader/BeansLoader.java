@@ -2,15 +2,13 @@ package com.pri.loader;
 
 import com.pri.annotation.*;
 import com.pri.exception.NoInjectException;
-import com.pri.factories.AopFactory;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MethodFactory;
-import com.pri.proxy.ProxyFactory;
+import com.pri.proxy.ProxyInterceptor;
 import net.sf.cglib.proxy.Enhancer;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -81,7 +79,7 @@ public class BeansLoader {
                     Class clz = Class.forName(packageName + "." + fileName.replace(".class", ""));
                     if (isService(clz) || isController(clz)) {
                         System.out.println(packageName + "." + fileName.replace(".class", ""));
-                        Object instance = Enhancer.create(clz, new ProxyFactory());
+                        Object instance = Enhancer.create(clz, new ProxyInterceptor());
                         BeanFactory.put(fileName.replace(".class", ""), instance);
 
                         String path = "";

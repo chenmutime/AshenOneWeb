@@ -1,6 +1,7 @@
 package com.pri.loader;
 
 import com.pri.annotation.Aop;
+import com.pri.entities.ProxyEntity;
 import com.pri.factories.AopFactory;
 
 import java.io.File;
@@ -38,11 +39,16 @@ public class AopLoader {
                     if (clz.isAnnotationPresent(Aop.class)) {
                         Field[] fields = clz.getFields();
                         Object instance = clz.newInstance();
+                        ProxyEntity proxyEntity = new ProxyEntity();
+                        proxyEntity.setInstance(instance);
+                        proxyEntity.setTarget(clz);
+                        proxyEntity.setClassName(clz.getSimpleName());
+                        proxyEntity.setFullClassName(clz.getName());
                         for (Field field : fields) {
                             field.setAccessible(true);
                             Aop aop = field.getAnnotation(Aop.class);
                             if (null != aop) {
-                                AopFactory.put(aop.value(), instance);
+                                AopFactory.put(aop.value(), proxyEntity);
                             }
                         }
                     }

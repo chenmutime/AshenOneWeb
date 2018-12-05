@@ -21,4 +21,8 @@ public class BeanFactory {
         return beanMap.entrySet().iterator();
     }
 
+    public static boolean isExits(String className){
+        return null != beanMap.get(className);
+    }
+
 }

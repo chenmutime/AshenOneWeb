@@ -3,16 +3,17 @@ package com.pri.aspect;
 import com.pri.annotation.AopAfter;
 import com.pri.annotation.Aop;
 import com.pri.annotation.AopBefore;
+import com.pri.annotation.AopException;
 
 @Aop
 public class HttpAspect {
 
-//    拦截注解了HttpLog的方法
+    //    拦截注解了HttpLog的方法
     @Aop("com.pri.annotation.HttpLog")
     public String annotationDefine;
 
     @AopBefore
-    public void doBefore(){
+    public void doBefore() {
         System.out.println("准备执行代码");
     }
 
@@ -21,8 +22,9 @@ public class HttpAspect {
         System.out.println("执行代码完成");
     }
 
+    @AopException
     public void doException(Exception e) {
-        System.out.println("执行代码出现异常:"+e.getMessage());
+        System.out.println("执行代码出现异常:" + e.getMessage());
     }
 
 }

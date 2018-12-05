@@ -46,8 +46,8 @@ public class ProxyInterceptor implements MethodInterceptor {
     private void doBefore(ProxyEntity proxyEntity) throws InvocationTargetException, IllegalAccessException {
         Class clz = proxyEntity.getTarget();
         Method[] methods = clz.getDeclaredMethods();
-        for (Method method:methods) {
-            if(method.isAnnotationPresent(AopBefore.class)){
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(AopBefore.class)) {
                 method.invoke(proxyEntity.getInstance());
             }
         }
@@ -56,8 +56,8 @@ public class ProxyInterceptor implements MethodInterceptor {
     private void doAfter(ProxyEntity proxyEntity) throws InvocationTargetException, IllegalAccessException {
         Class clz = proxyEntity.getTarget();
         Method[] methods = clz.getDeclaredMethods();
-        for (Method method:methods) {
-            if(method.isAnnotationPresent(AopAfter.class)){
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(AopAfter.class)) {
                 method.invoke(proxyEntity.getInstance());
             }
         }
@@ -66,8 +66,8 @@ public class ProxyInterceptor implements MethodInterceptor {
     private void doException(ProxyEntity proxyEntity) throws InvocationTargetException, IllegalAccessException {
         Class clz = proxyEntity.getTarget();
         Method[] methods = clz.getDeclaredMethods();
-        for (Method method:methods) {
-            if(method.isAnnotationPresent(AopException.class)){
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(AopException.class)) {
                 method.invoke(proxyEntity.getInstance());
             }
         }

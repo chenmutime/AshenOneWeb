@@ -2,9 +2,8 @@ package com.pri;
 
 import com.alibaba.fastjson.JSONObject;
 import com.pri.factories.BeanFactory;
-import com.pri.factories.MethodFactory;
-import com.pri.loader.AopLoader;
-import com.pri.loader.BeansLoader;
+import com.pri.factories.MappingFactory;
+import com.pri.loader.ApplicationLoader;
 import com.pri.wrapper.ResponseWrapper;
 
 import javax.servlet.ServletConfig;
@@ -20,11 +19,8 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        System.out.println("项目启动");
         String scanPackagePath = config.getServletContext().getInitParameter("scanPackage");
-        AopLoader.load(scanPackagePath);
-        BeansLoader.load(scanPackagePath);
-
+        ApplicationLoader.load(scanPackagePath);
     }
 
     @Override
@@ -34,7 +30,7 @@ public class DispatcherServlet extends HttpServlet {
 
         String methodUri = req.getServletPath();
 
-        Method method = MethodFactory.get(methodUri);
+        Method method = MappingFactory.get(methodUri);
         String className = method.getDeclaringClass().getSimpleName();
         Object clz = BeanFactory.get(className);
         try {

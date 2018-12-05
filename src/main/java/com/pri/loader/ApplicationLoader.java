@@ -1,14 +1,17 @@
 package com.pri.loader;
 
 import com.pri.annotation.*;
-import com.pri.entities.ProxyEntity;
+import com.pri.entities.MappingEntity;
+import com.pri.entities.ProxyClassEntity;
 import com.pri.exception.ClassExitsException;
+import com.pri.exception.MappingExitsException;
 import com.pri.exception.NoInjectException;
 import com.pri.factories.AopFactory;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MappingFactory;
 import com.pri.proxy.ProxyInterceptor;
 import net.sf.cglib.proxy.Enhancer;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +89,7 @@ public class ApplicationLoader {
                         System.out.println(packageName + "." + fileName.replace(".class", ""));
                         Object instance = Enhancer.create(clz, new ProxyInterceptor());
                         String className = fileName.replace(".class", "");
-                        if(BeanFactory.isExits(className)){
+                        if (BeanFactory.isExits(className)) {
                             throw new ClassExitsException();
                         }
                         BeanFactory.put(className, instance);
@@ -99,31 +102,55 @@ public class ApplicationLoader {
             e.printStackTrace();
         } catch (ClassExitsException e) {
             e.printStackTrace();
+        } catch (MappingExitsException e) {
+            e.printStackTrace();
         }
     }
 
     /**
      * 包装所有web请求方法
+     *
      * @param controllerClz
      */
-    private static void addMapping(Class controllerClz) {
+    private static void addMapping(Class controllerClz) throws MappingExitsException {
+        String classPath = "";
         if (controllerClz.isAnnotationPresent(WebUrl.class)) {
             WebUrl webUrl = (WebUrl) controllerClz.getAnnotation(WebUrl.class);
-            String path = webUrl.value();
-            Method[] methods = controllerClz.getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.isAnnotationPresent(WebUrl.class)) {
-                    WebUrl methodWebUrl =  method.getAnnotation(WebUrl.class);
-                    path += methodWebUrl.value();
-                    System.out.println(path);
-                    MappingFactory.put(path, method);
+            classPath = webUrl.value();
+            if (!classPath.startsWith("/")) {
+                classPath = "/" + classPath;
+            }
+        }
+        Method[] methods = controllerClz.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(WebUrl.class)) {
+                WebUrl methodWebUrl = method.getAnnotation(WebUrl.class);
+                String methodPath = classPath + methodWebUrl.value();
+                String urlPath = "";
+                String[] paths = methodPath.split("/");
+                for (int i = 0, j = paths.length; i < j; i++) {
+                    if (paths[i].startsWith("{") && paths[i].endsWith("}")) {
+                        paths[i] = "{#}";
+                    }
+                    if (StringUtils.isNotBlank(paths[i])) {
+                        urlPath += "/" + paths[i];
+                    }
                 }
+                if (null != MappingFactory.get(urlPath)) {
+                    throw new MappingExitsException();
+                }
+                System.out.println(methodPath);
+                MappingEntity entity = new MappingEntity();
+                entity.setClassPath(classPath);
+                entity.setMethod(method);
+                MappingFactory.put(urlPath, entity);
             }
         }
     }
 
     /**
      * 包装所有的AOP类
+     *
      * @param directory
      * @param packageName
      */
@@ -139,16 +166,26 @@ public class ApplicationLoader {
                     if (clz.isAnnotationPresent(Aop.class)) {
                         Field[] fields = clz.getFields();
                         Object instance = clz.newInstance();
-                        ProxyEntity proxyEntity = new ProxyEntity();
-                        proxyEntity.setInstance(instance);
-                        proxyEntity.setTarget(clz);
-                        proxyEntity.setClassName(clz.getSimpleName());
-                        proxyEntity.setFullClassName(clz.getName());
                         for (Field field : fields) {
                             field.setAccessible(true);
                             Aop aop = field.getAnnotation(Aop.class);
                             if (null != aop) {
-                                AopFactory.put(aop.value(), proxyEntity);
+//                              要处理的Aspect类信息
+                                ProxyClassEntity proxyClassEntity = new ProxyClassEntity();
+                                proxyClassEntity.setInstance(instance);
+                                proxyClassEntity.setTarget(clz);
+                                proxyClassEntity.setClassName(clz.getSimpleName());
+                                proxyClassEntity.setFullClassName(clz.getName());
+//                                保存AOP处理类中的各个通知方法
+                                Map<String, Method> methodMap = proxyClassEntity.getMethodMap();
+                                Method[] methods = clz.getDeclaredMethods();
+                                for (Method method : methods) {
+                                    if (method.getAnnotations().length > 0) {
+                                        String annocationName = method.getAnnotations()[0].annotationType().getName();
+                                        methodMap.put(annocationName, method);
+                                    }
+                                }
+                                AopFactory.put(aop.value(), proxyClassEntity);
                             }
                         }
                     }

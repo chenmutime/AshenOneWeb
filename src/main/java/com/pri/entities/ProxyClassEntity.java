@@ -1,14 +1,34 @@
 package com.pri.entities;
 
-public class ProxyEntity {
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 处理AOP的类，如HttpAspect
+ */
+public class ProxyClassEntity {
 
     private String className;
 
     private String fullClassName;
 
+    private Map<String, Method> methodMap;
+
     private Class target;
 
     private Object instance;
+
+    public synchronized Map<String, Method> getMethodMap() {
+        if(null == methodMap){
+            methodMap = new HashMap<>();
+        }
+        return methodMap;
+    }
+
+    public void setMethodMap(Map<String, Method> methodMap) {
+        this.methodMap = methodMap;
+    }
 
     public Object getInstance() {
         return instance;

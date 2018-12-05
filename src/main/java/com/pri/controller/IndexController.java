@@ -16,4 +16,22 @@ public class IndexController {
         return "success:" + indexService.get();
     }
 
+    @WebUrl("/get/{userId}")
+    public String getUser(@RequestParam String userId){
+
+        return "userid";
+    }
+
+    @WebUrl("/get/{userId}/www")
+    public String getUsers(@RequestParam String userId){
+
+        return "www";
+    }
+
+    @WebUrl("/{userId}")
+    public String getUsersq(@RequestParam String userId){
+
+        return "xxsas";
+    }
+
 }

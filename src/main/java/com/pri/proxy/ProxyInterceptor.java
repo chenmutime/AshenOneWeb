@@ -1,76 +1,67 @@
 package com.pri.proxy;
 
-import com.pri.annotation.AopAfter;
-import com.pri.annotation.AopException;
+import com.pri.annotation.AopAround;
 import com.pri.annotation.AopBefore;
-import com.pri.entities.ProxyEntity;
+import com.pri.annotation.AopException;
+import com.pri.entities.ProxyClassEntity;
+import com.pri.entities.ProxyPoint;
 import com.pri.factories.AopFactory;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProxyInterceptor implements MethodInterceptor {
 
-    public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+    public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
         Object object = null;
         Annotation[] annotations = method.getAnnotations();
-        List<ProxyEntity> proxyEntityList = new ArrayList();
+        List<ProxyClassEntity> proxyClassEntityList = new ArrayList();
         for (Annotation annotation : annotations) {
             String annotationName = annotation.annotationType().getName();
-            ProxyEntity proxyEntity = AopFactory.get(annotationName);
-            if (null != proxyEntity) {
-                proxyEntityList.add(proxyEntity);
+//            这里proxyEntity指的是处理AOP的类，如HttpAspect类
+            ProxyClassEntity proxyClassEntity = AopFactory.get(annotationName);
+            if (null != proxyClassEntity) {
+                proxyClassEntityList.add(proxyClassEntity);
             }
         }
-        if (!proxyEntityList.isEmpty()) {
-            for (ProxyEntity proxyEntity : proxyEntityList) {
-                try {
-                    doBefore(proxyEntity);
-                    object = methodProxy.invokeSuper(o, args);
-                    doAfter(proxyEntity);
-                } catch (Exception e) {
-                    doException(proxyEntity);
-                }
+        if (!proxyClassEntityList.isEmpty()) {
+//            一个方法可能有多个AOP处理类
+            for (ProxyClassEntity proxyClassEntity : proxyClassEntityList) {
+                object = doProxy(proxyClassEntity, obj, method, args, methodProxy);
             }
         } else {
-            object = methodProxy.invokeSuper(o, args);
+//            该方法没有可执行的AOP类
+            object = methodProxy.invokeSuper(obj, args);
         }
         return object;
     }
 
-    private void doBefore(ProxyEntity proxyEntity) throws InvocationTargetException, IllegalAccessException {
-        Class clz = proxyEntity.getTarget();
-        Method[] methods = clz.getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(AopBefore.class)) {
-                method.invoke(proxyEntity.getInstance());
+    private Object doProxy(ProxyClassEntity proxyClassEntity, Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        Map<String, Method> methodMap = proxyClassEntity.getMethodMap();
+        Object object = null;
+        try {
+//            保存的通知方法中是否包含环绕通知
+            if (methodMap.containsKey(AopAround.class.getName())) {
+                ProxyPoint point = new ProxyPoint(method, obj, args, methodProxy);
+                Method aroundMethod = methodMap.get(AopAround.class.getName());
+                object = aroundMethod.invoke(proxyClassEntity.getInstance(), point);
+            } else {
+                Method beforeMethod = methodMap.get(AopBefore.class.getName());
+                beforeMethod.invoke(proxyClassEntity.getInstance());
+                methodProxy.invokeSuper(obj, args);
+                Method afterMethod = methodMap.get(AopBefore.class.getName());
+                afterMethod.invoke(proxyClassEntity.getInstance());
             }
+        } catch (Exception e) {
+            Method exceptionMethod = methodMap.get(AopException.class.getName());
+            exceptionMethod.invoke(proxyClassEntity.getInstance(), e);
         }
-    }
-
-    private void doAfter(ProxyEntity proxyEntity) throws InvocationTargetException, IllegalAccessException {
-        Class clz = proxyEntity.getTarget();
-        Method[] methods = clz.getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(AopAfter.class)) {
-                method.invoke(proxyEntity.getInstance());
-            }
-        }
-    }
-
-    private void doException(ProxyEntity proxyEntity) throws InvocationTargetException, IllegalAccessException {
-        Class clz = proxyEntity.getTarget();
-        Method[] methods = clz.getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(AopException.class)) {
-                method.invoke(proxyEntity.getInstance());
-            }
-        }
+        return object;
     }
 
 }

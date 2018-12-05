@@ -1,9 +1,11 @@
 package com.pri;
 
 import com.alibaba.fastjson.JSONObject;
+import com.pri.entities.MappingEntity;
 import com.pri.factories.BeanFactory;
 import com.pri.factories.MappingFactory;
 import com.pri.loader.ApplicationLoader;
+import com.pri.wrapper.RequestWrapper;
 import com.pri.wrapper.ResponseWrapper;
 
 import javax.servlet.ServletConfig;
@@ -28,21 +30,35 @@ public class DispatcherServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        String methodUri = req.getServletPath();
+        String mappingUri = req.getServletPath();
 
-        Method method = MappingFactory.get(methodUri);
-        String className = method.getDeclaringClass().getSimpleName();
-        Object clz = BeanFactory.get(className);
-        try {
-            Object result = method.invoke(clz);
-            String jsonRsult = JSONObject.toJSONString(result);
-            ResponseWrapper.defaultResponse(resp, jsonRsult);
-            resp.getWriter().print(jsonRsult);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        MappingEntity mappingEntity = RequestWrapper.getMethod(mappingUri);
+        if (null == mappingEntity) {
+            resp.setStatus(404);
+            resp.getWriter();
+        } else {
+            Method method = mappingEntity.getMethod();
+            String className = method.getDeclaringClass().getSimpleName();
+            Object clz = BeanFactory.get(className);
+            try {
+                Object result;
+                if (method.getParameterCount() > 1) {
+                    result = method.invoke(clz);
+                } else if (method.getParameterCount() == 1) {
+                    result = method.invoke(clz, "");
+                } else {
+                    result = method.invoke(clz);
+                }
+                String jsonRsult = JSONObject.toJSONString(result);
+                ResponseWrapper.defaultResponse(resp, jsonRsult);
+                resp.getWriter().print(jsonRsult);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
+
 
     }
 }

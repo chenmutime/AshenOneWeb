@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ParameterUtil {
 
-    public static Object[] getParameter(HttpServletRequest req, Method method) throws IOException {
+    public static Object[] getParameterArray(HttpServletRequest req, Method method) throws IOException {
         List<Object> paramList = new LinkedList<>();
         if (method.getParameterCount() > 0) {
             Parameter[] parameters = method.getParameters();

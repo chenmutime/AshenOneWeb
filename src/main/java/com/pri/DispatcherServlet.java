@@ -6,7 +6,6 @@ import com.pri.factories.BeanFactory;
 import com.pri.factories.MappingFactory;
 import com.pri.loader.ApplicationLoader;
 import com.pri.util.ParameterUtil;
-import com.pri.wrapper.RequestWrapper;
 import com.pri.wrapper.ResponseWrapper;
 
 import javax.servlet.ServletConfig;
@@ -34,19 +33,14 @@ public class DispatcherServlet extends HttpServlet {
         String mappingUri = req.getServletPath();
         MappingEntity mappingEntity = MappingFactory.get(mappingUri);
 
-        requestFilter(req, resp, mappingEntity);
+        requestVerify(req, resp, mappingEntity);
 
         Method method = mappingEntity.getMethod();
-        Object[] param = ParameterUtil.getParameter(req, method);
+        Object[] params = ParameterUtil.getParameterArray(req, method);
         String className = method.getDeclaringClass().getSimpleName();
-        Object clz = BeanFactory.get(className);
+        Object classInstance = BeanFactory.get(className);
         try {
-            Object result;
-            if (method.getParameterCount() > 0) {
-                result = method.invoke(clz, param);
-            } else {
-                result = method.invoke(clz);
-            }
+            Object result = method.invoke(classInstance, params);
             String jsonRsult = JSONObject.toJSONString(result);
             ResponseWrapper.defaultResponse(resp, jsonRsult);
             resp.getWriter().print(jsonRsult);
@@ -57,7 +51,7 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    private void requestFilter(HttpServletRequest req, HttpServletResponse resp, MappingEntity mappingEntity) throws IOException {
+    private void requestVerify(HttpServletRequest req, HttpServletResponse resp, MappingEntity mappingEntity) throws IOException {
         if (null == mappingEntity) {
             resp.setStatus(404);
             resp.getWriter().print("page not found");

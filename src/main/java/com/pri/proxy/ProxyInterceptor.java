@@ -1,5 +1,6 @@
 package com.pri.proxy;
 
+import com.pri.annotation.AopAfter;
 import com.pri.annotation.AopAround;
 import com.pri.annotation.AopBefore;
 import com.pri.annotation.AopException;
@@ -10,6 +11,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,17 +53,21 @@ public class ProxyInterceptor implements MethodInterceptor {
                 Method aroundMethod = methodMap.get(AopAround.class.getName());
                 object = aroundMethod.invoke(proxyClassEntity.getInstance(), point);
             } else {
-                Method beforeMethod = methodMap.get(AopBefore.class.getName());
-                beforeMethod.invoke(proxyClassEntity.getInstance());
-                methodProxy.invokeSuper(obj, args);
-                Method afterMethod = methodMap.get(AopBefore.class.getName());
-                afterMethod.invoke(proxyClassEntity.getInstance());
+                doAspectMethod(methodMap.get(AopBefore.class.getName()), proxyClassEntity.getInstance());
+                object = methodProxy.invokeSuper(obj, args);
+                doAspectMethod(methodMap.get(AopAfter.class.getName()), proxyClassEntity.getInstance());
             }
         } catch (Exception e) {
             Method exceptionMethod = methodMap.get(AopException.class.getName());
             exceptionMethod.invoke(proxyClassEntity.getInstance(), e);
         }
         return object;
+    }
+
+    private void doAspectMethod(Method method, Object instance) throws InvocationTargetException, IllegalAccessException {
+        if (null != method) {
+            method.invoke(instance);
+        }
     }
 
 }

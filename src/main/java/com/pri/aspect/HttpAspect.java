@@ -23,13 +23,13 @@ public class HttpAspect {
         System.out.println("执行代码完成");
     }
 
-    @AopAround
-    public Object doAround(ProxyPoint point) throws Throwable {
-        System.out.println("准备执行代码222");
-        Object obj = point.process();
-        System.out.println("执行代码完成222");
-        return obj;
-    }
+//    @AopAround
+//    public Object doAround(ProxyPoint point) throws Throwable {
+//        System.out.println("准备执行代码222");
+//        Object obj = point.process();
+//        System.out.println("执行代码完成222");
+//        return obj;
+//    }
 
     @AopException
     public void doException(Exception e) {

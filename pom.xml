@@ -67,6 +67,12 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.54</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.cedarsoft.commons/io -->
+        <dependency>
+            <groupId>com.cedarsoft.commons</groupId>
+            <artifactId>io</artifactId>
+            <version>8.7.0</version>
+        </dependency>
 
     </dependencies>
 

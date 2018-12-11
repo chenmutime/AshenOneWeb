@@ -3,7 +3,6 @@ package com.pri.util;
 import com.alibaba.fastjson.JSONObject;
 import com.pri.annotation.RequestBody;
 import com.pri.annotation.RequestParam;
-import com.pri.constant.HttpMethod;
 import org.apache.commons.io.IOUtils;
 
 import javax.servlet.ServletInputStream;
